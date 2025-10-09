@@ -33,14 +33,13 @@ LABEL maintainer="your-team@example.com" \
 # Install wget for health checks
 RUN apk add --no-cache wget
 
+# Configurable port argument
+ARG APP_PORT=3000
+
 # Set environment variables (configurable)
 ENV NODE_ENV=production \
     HOSTNAME="0.0.0.0" \
-    PORT=3000
-
-# Configurable port argument
-ARG APP_PORT=3000
-ENV PORT=${APP_PORT}
+    PORT=${APP_PORT}
 
 # Set working directory
 WORKDIR /app
