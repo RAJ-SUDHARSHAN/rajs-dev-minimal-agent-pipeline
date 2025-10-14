@@ -1,7 +1,7 @@
 terraform {
   backend "s3" {
     bucket         = "sirpi-terraform-states"
-    key            = "states/sess_29feac5cd554/terraform.tfstate"
+    key            = "states/sess_9ae65e0f82ac/terraform.tfstate"
     region         = "us-west-2"
     dynamodb_table = "sirpi-terraform-locks"
     encrypt        = true
