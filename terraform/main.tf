@@ -179,7 +179,7 @@ resource "aws_ecs_task_definition" "app" {
         }
       }
       healthCheck = {
-        command     = ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3000/api/health || exit 1"]
+        command     = ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3000/ || exit 1"]
         interval    = 30
         timeout     = 5
         retries     = 3
@@ -251,7 +251,7 @@ resource "aws_lb_target_group" "app" {
   health_check {
     enabled             = true
     interval            = 30
-    path                = "/api/health"
+    path                = "/"
     port                = "traffic-port"
     healthy_threshold   = 2
     unhealthy_threshold = 3
