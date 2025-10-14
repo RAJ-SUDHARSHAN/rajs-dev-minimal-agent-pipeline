@@ -32,7 +32,7 @@ LABEL maintainer="your-team@example.com" \
       org.opencontainers.image.source="https://github.com/your-org/your-repo" \
       org.opencontainers.image.vendor="Your Organization"
 
-# Install wget for health checks and security updates
+# Install wget for health checks and apply security updates
 RUN apk add --no-cache wget && \
     apk upgrade --no-cache
 
