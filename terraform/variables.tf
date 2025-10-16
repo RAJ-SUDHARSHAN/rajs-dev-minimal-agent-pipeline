@@ -10,6 +10,12 @@ variable "app_name" {
   default     = "myapp"
 }
 
+variable "ecr_repository_name" {
+  description = "ECR repository name (derived from GitHub repository)"
+  type        = string
+  default     = "rajs-dev-minimal-agent-pipeline"
+}
+
 variable "environment" {
   description = "Environment (dev, staging, prod)"
   type        = string
@@ -53,6 +59,13 @@ variable "desired_count" {
 }
 
 variable "acm_certificate_arn" {
-  description = "ARN of ACM certificate for HTTPS (REQUIRED - create in AWS Certificate Manager)"
+  description = "ARN of ACM certificate for HTTPS listener. Leave as placeholder to deploy HTTP-only (not recommended for production)"
   type        = string
+  default     = "arn:aws:acm:REGION:ACCOUNT:certificate/PLACEHOLDER"
+}
+
+variable "enable_https" {
+  description = "Enable HTTPS listener (requires valid ACM certificate)"
+  type        = bool
+  default     = false
 }

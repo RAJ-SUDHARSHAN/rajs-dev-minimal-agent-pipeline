@@ -113,17 +113,10 @@ resource "aws_route_table_association" "private" {
   route_table_id = aws_route_table.private.id
 }
 
-# ECR Repository
-resource "aws_ecr_repository" "main" {
-  name                 = "${var.app_name}-repo"
-  image_tag_mutability = "MUTABLE"
-  image_scanning_configuration {
-    scan_on_push = true
-  }
-  tags = {
-    Name        = "${var.app_name}-ecr"
-    Environment = var.environment
-  }
+# ECR Repository (must exist before deployment)
+# Created during Docker build step
+data "aws_ecr_repository" "main" {
+  name = var.ecr_repository_name
 }
 
 # CloudWatch Log Group
@@ -162,7 +155,7 @@ resource "aws_ecs_task_definition" "app" {
   container_definitions = jsonencode([
     {
       name  = var.app_name
-      image = "${aws_ecr_repository.main.repository_url}:latest"
+      image = "${data.aws_ecr_repository.main.repository_url}:latest"
       portMappings = [
         {
           containerPort = 3000
@@ -223,7 +216,7 @@ resource "aws_ecs_service" "main" {
     Environment = var.environment
   }
 
-  depends_on = [aws_lb_listener.https]
+  depends_on = [aws_lb_listener.http]
 }
 
 # Application Load Balancer
@@ -268,8 +261,9 @@ resource "aws_lb_target_group" "app" {
   }
 }
 
-# ALB Listener - HTTPS
+# ALB Listener - HTTPS (conditional on enable_https)
 resource "aws_lb_listener" "https" {
+  count             = var.enable_https ? 1 : 0
   load_balancer_arn = aws_lb.main.arn
   port              = "443"
   protocol          = "HTTPS"
@@ -282,18 +276,24 @@ resource "aws_lb_listener" "https" {
   }
 }
 
-# ALB Listener - HTTP (redirect to HTTPS)
+# ALB Listener - HTTP (redirect to HTTPS if enabled, otherwise forward)
 resource "aws_lb_listener" "http" {
   load_balancer_arn = aws_lb.main.arn
   port              = "80"
   protocol          = "HTTP"
 
   default_action {
-    type = "redirect"
-    redirect {
-      port        = "443"
-      protocol    = "HTTPS"
-      status_code = "HTTP_301"
+    type = var.enable_https ? "redirect" : "forward"
+    
+    dynamic "redirect" {
+      for_each = var.enable_https ? [1] : []
+      content {
+        port        = "443"
+        protocol    = "HTTPS"
+        status_code = "HTTP_301"
+      }
     }
+    
+    target_group_arn = var.enable_https ? null : aws_lb_target_group.app.arn
   }
 }

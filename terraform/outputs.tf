@@ -4,8 +4,8 @@ output "alb_dns_name" {
 }
 
 output "ecr_repository_url" {
-  description = "ECR repository URL - push Docker images here"
-  value       = aws_ecr_repository.main.repository_url
+  description = "ECR repository URL - Docker image location"
+  value       = data.aws_ecr_repository.main.repository_url
 }
 
 output "ecs_cluster_name" {
